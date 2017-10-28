@@ -1,9 +1,9 @@
 -- phpMyAdmin SQL Dump
 -- version 4.7.4
 -- https://www.phpmyadmin.net/
---program 2
+-- program 2
 -- Host: localhost
--- Generation Time: Oct 28, 2017 at 01:21 PM
+-- Generation Time: Oct 28, 2017 at 05:35 PM
 -- Server version: 10.1.28-MariaDB
 -- PHP Version: 7.1.10
 
@@ -152,10 +152,9 @@ INSERT INTO `student` (`SID`, `SNAME`, `DEGREE`, `YEAR`, `SEX`, `DEPTNO`, `ADVIS
 (105, 'Akhil', 'BTech', 2010, 'M', 301, 206, '964537889'),
 (106, 'Jayan', 'BTech', 2012, 'M', 302, 205, '987667876'),
 (107, 'Nikhila', 'BTech', 2012, 'F', 302, 205, '987789737'),
-(107, 'Nikhila', 'BTech', 2012, 'F', 302, 205, '96453324'),
 (108, 'Sreela', 'BTech', 2012, 'F', 302, 205, '96453324'),
 (109, 'Gayathri Mohan', 'MCA', 2012, 'F', 303, 204, '9847756433'),
-(111, 'Aromal', 'MTech', 2012, 'M', 301, 204, null);
+(111, 'Aromal', 'MTech', 2012, 'M', 301, 204, NULL);
 
 -- --------------------------------------------------------
 
@@ -164,10 +163,10 @@ INSERT INTO `student` (`SID`, `SNAME`, `DEGREE`, `YEAR`, `SEX`, `DEPTNO`, `ADVIS
 --
 
 CREATE TABLE `teach` (
-  `PID` int(11) DEFAULT NULL,
-  `CID` int(11) DEFAULT NULL,
-  `SEM` int(11) DEFAULT NULL,
-  `YEAR` int(11) DEFAULT NULL,
+  `PID` int(11) NOT NULL,
+  `CID` int(11) NOT NULL,
+  `SEM` int(11) NOT NULL,
+  `YEAR` int(11) NOT NULL,
   `CLASSROOM` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -176,12 +175,97 @@ CREATE TABLE `teach` (
 --
 
 INSERT INTO `teach` (`PID`, `CID`, `SEM`, `YEAR`, `CLASSROOM`) VALUES
-(204, 401, 2, NULL, 501),
-(205, 402, 4, NULL, 502),
-(206, 403, 5, NULL, 503),
-(204, 402, 4, NULL, 502),
-(204, 403, 5, NULL, 503),
-(205, 401, 2, NULL, 501);
+(204, 401, 2, 0, 501),
+(204, 402, 4, 0, 502),
+(204, 403, 5, 0, 503),
+(205, 401, 2, 0, 501),
+(205, 402, 4, 0, 502),
+(206, 403, 5, 0, 503);
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `course`
+--
+ALTER TABLE `course`
+ADD PRIMARY KEY (`CID`),
+ADD KEY `DEPTNO` (`DEPTNO`);
+
+--
+-- Indexes for table `department`
+--
+ALTER TABLE `department`
+ADD PRIMARY KEY (`DEPTNO`);
+
+--
+-- Indexes for table `enrolled`
+--
+ALTER TABLE `enrolled`
+ADD PRIMARY KEY (`SID`,`CID`,`SEM`,`YEAR`),
+ADD KEY `SID` (`SID`),
+ADD KEY `CID` (`CID`);
+
+--
+-- Indexes for table `professor`
+--
+ALTER TABLE `professor`
+ADD PRIMARY KEY (`PID`),
+ADD KEY `DEPTNO` (`DEPTNO`);
+
+--
+-- Indexes for table `student`
+--
+ALTER TABLE `student`
+ADD PRIMARY KEY (`SID`),
+ADD KEY `DEPTNO` (`DEPTNO`),
+ADD KEY `ADVISOR` (`ADVISOR`);
+
+--
+-- Indexes for table `teach`
+--
+ALTER TABLE `teach`
+ADD PRIMARY KEY (`PID`,`CID`,`SEM`,`YEAR`),
+ADD KEY `PID` (`PID`),
+ADD KEY `CID` (`CID`);
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `course`
+--
+ALTER TABLE `course`
+ADD CONSTRAINT `course_ibfk_1` FOREIGN KEY (`DEPTNO`) REFERENCES `department` (`DEPTNO`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `enrolled`
+--
+ALTER TABLE `enrolled`
+ADD CONSTRAINT `enrolled_ibfk_1` FOREIGN KEY (`SID`) REFERENCES `student` (`SID`) ON DELETE CASCADE ON UPDATE CASCADE,
+ADD CONSTRAINT `enrolled_ibfk_2` FOREIGN KEY (`CID`) REFERENCES `course` (`CID`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `professor`
+--
+ALTER TABLE `professor`
+ADD CONSTRAINT `professor_ibfk_1` FOREIGN KEY (`DEPTNO`) REFERENCES `department` (`DEPTNO`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `student`
+--
+ALTER TABLE `student`
+ADD CONSTRAINT `student_ibfk_1` FOREIGN KEY (`DEPTNO`) REFERENCES `department` (`DEPTNO`) ON DELETE CASCADE ON UPDATE CASCADE,
+ADD CONSTRAINT `student_ibfk_2` FOREIGN KEY (`ADVISOR`) REFERENCES `professor` (`PID`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `teach`
+--
+ALTER TABLE `teach`
+ADD CONSTRAINT `teach_ibfk_1` FOREIGN KEY (`PID`) REFERENCES `professor` (`PID`) ON DELETE CASCADE ON UPDATE CASCADE,
+ADD CONSTRAINT `teach_ibfk_2` FOREIGN KEY (`CID`) REFERENCES `course` (`CID`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
@@ -190,60 +274,55 @@ COMMIT;
 
 
 
-/*
+-- delete from professor where syear=1992;
+--   update professor set phno='0476-4567878' where deptno=(select deptno from
+-- department where dname='MCA');
+--   select pname from professor where syear>1990 order by pname;
+--   select sid from student where phno is null;
 
+--   select pname from professor where syear between 1990 and 2000;
+-- select sname,sid from student where sex='F' and (deptno=(select deptno from
+-- department where dname='MCA'));
+-- select pid,pname,phno from professor where syear>2000 and (deptno=(select deptno
+-- from department where dname='MCA'));
+-- select s.sid,s.sname,p.pname,p.phno from student s,professor p,department d where
+-- s.deptno=d.deptno and s.deptno=d.deptno and s.advisor=p.pid and s.deptno=(select deptno
+-- from department where dname='CSE');
 
+-- select sid,sname from student where advisor in(select pid from professor where
+-- sex='F');
 
+-- select pid,pname from professor where syear<=all(select min(syear) from professor);
 
-delete from professor where syear=1992;
-  update professor set phno='0476-4567878' where deptno=(select deptno from
-department where dname='MCA');
-  select pname from professor where syear>1990 order by pname;
-  select sid from student where phno is null;
+-- select s.sid,s.sname from student s,professor p where s.advisor=p.pid and s.sex=p.sex;
 
-  select pname from professor where syear between 1990 and 2000;
-select sname,sid from student where sex='F' and (deptno=(select deptno from
-department where dname='MCA'));
-select pid,pname,phno from professor where syear>2000 and (deptno=(select deptno
-from department where dname='MCA'));
-select s.sid,s.sname,p.pname,p.phno from student s,professor p,department d where
-s.deptno=d.deptno and s.deptno=d.deptno and s.advisor=p.pid and s.deptno=(select deptno
-from department where dname='CSE');
+-- select pid,pname from professor where pid in(select pid from student where
+-- sex='F'group by advisor);
+-- select c.deptno,d.dname from course c,department d where d.deptno=c.deptno and
+-- c.mincdts<>50;
+-- select c.deptno,d.dname from course c,department d where d.deptno=c.deptno and
+-- c.mincdts=50;
 
-select sid,sname from student where advisor in(select pid from professor where
-sex='F');
+-- select sid from enrolled where cid in(select cid from course where cname='MCA')
+-- union select sid from enrolled where cid in(select cid from course where cname='BTech');
 
-select pid,pname from professor where syear<=all(select min(syear) from professor);
+-- select sid,sname from student where degree='MTech' and sid not in (select sid from
+-- enrolled);
 
-select s.sid,s.sname from student s,professor p where s.advisor=p.pid and s.sex=p.sex;
+-- create view v1(did,total) as (select DEPTNO,count(CID) from course group by DEPTNO);
 
-select pid,pname from professor where pid in(select pid from student where
-sex='F'group by advisor);
-select c.deptno,d.dname from course c,department d where d.deptno=c.deptno and
-c.mincdts<>50;
-select c.deptno,d.dname from course c,department d where d.deptno=c.deptno and
-c.mincdts=50;
+-- select v.*, d.DNAME from department d,v1 v where d.DEPTNO=v.DID
 
-select sid from enrolled where cid in(select cid from course where cname='MCA')
-union select sid from enrolled where cid in(select cid from course where cname='BTech');
+-- select count(sid) from enrolled where sem=2 and year=2012 group by cid having cid
+-- in( select cid from course where mincdts=60);
 
-select sid,sname from student where degree='MTech' and sid not in (select sid from
-enrolled);
+-- select sid,sname from student where sname like '%Mohan';
 
-create view v1(did,total) as (select DEPTNO,count(CID) from course group by DEPTNO);
+-- create view professorOnCse(pid,pname,phno) as select PID,PNAME,PHNO from
+-- professor where SYEAR>=2000 and deptno in(select DEPTNO from department where
+-- DNAME='CSE');
 
-select v.*, d.DNAME from department d,v1 v where d.DEPTNO=v.DID
-
-select count(sid) from enrolled where sem=2 and year=2012 group by cid having cid
-in( select cid from course where mincdts=60);
-
-select sid,sname from student where sname like '%Mohan';
-
-create view professorOnCse(pid,pname,phno) as select PID,PNAME,PHNO from
-professor where SYEAR>=2000 and deptno in(select DEPTNO from department where
-DNAME='CSE');
-
-select pname from professorOnCse where pname like 'M%n';
+-- select pname from professorOnCse where pname like 'M%n';
 
 
 
@@ -252,5 +331,3 @@ select pname from professorOnCse where pname like 'M%n';
 
 
 
-
-*/
